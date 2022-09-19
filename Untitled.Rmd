@@ -1,0 +1,499 @@
+---
+title: "My Statistics Note"
+header_includes:
+- \usepackage{amsmath}
+- \usepackage{amssymb}
+- \usepackage[english]{babel}
+- \usepackage[utf8]{inputenc}
+- \usepackage{amsmath}
+- \usepackage{amsthm}
+  
+output:
+  pdf_document:
+    number_sections: true
+    toc: true
+    extra_dependencies: ["amsthm", "amsmath"]
+  html_notebook: default
+---
+
+```{=latex}
+\theoremstyle{definition}
+\newtheorem{thm}{Theorem}[section]
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[section]
+
+\theoremstyle{definition}
+\newtheorem{example}{Example}[section]
+```
+
+
+```{=latex}
+\section{Sampling Distributions Related to the Normal Distribution}
+\begin{thm}\label{thm_1}
+Let $Y_1, Y_2, ..., Y_n$ be a random sample of size $n$ from a normal distribution with mean $\mu$ and variance $\sigma^2$.
+Then
+$$
+\overline{Y}
+=
+\frac{1}{n}\sum_{i=1}^n Y_i
+$$
+is normally distributed with mean $\mu_{\overline{Y}}=\mu$ and variance $\sigma_{\overline{Y}}^2=\sigma^2/n.$
+\end{thm}
+
+\begin{thm}
+Let $Y_1, Y_2, ..., Y_n$ be defined as in Theorem \ref{thm_1}.
+Then $Z_i=\frac{Y_i-\mu}{\sigma}$ are independent,
+standard normal random variables, $i=1,2, ..., n$,
+and 
+$$
+\sum_{i=1}^n Z^2 
+=
+\sum_{i=1}^n \left( \frac{Y_i-\mu}{\sigma}\right)^2
+$$
+has a $\chi^2$ distribution with $n$ degrees of freedom (df).
+\end{thm}
+
+A good estimator of $\sigma^2$ is the sample variance
+$$
+S^2
+=
+\frac{1}{n-1}\sum_{i=1}^n(Y_i-\overline{Y})^2.
+$$
+
+\begin{thm}\label{thm_3}
+Let $Y_1, Y_2, ..., Y_n$ be a random sample from a normal distribution with mean $\mu$ and variance $\sigma^2$. 
+Then
+$$
+\frac{(n-1)S^2}{\sigma^2}
+=
+\frac{1}{\sigma^2}\sum_{i=1}^n(Y_i-\overline{Y})^2
+$$
+has a $\chi^2$ distribution with $(n-1)$ df.
+Also, 
+$\overline{Y}$ and $S^2$ are independent random variables.
+\end{thm}
+
+\begin{defn}
+Let $Z$ be a standard normal random variable and let $W$ be a $\chi^2-$distributed variable with $\nu$ df.
+Then if $Z$ and $W$ are independent,
+$$
+T
+=
+\frac{Z}{\sqrt{W/\nu}}
+$$
+is said to have a $t$ distribution with $\nu$ df.
+\end{defn}
+
+If $Y_1, ..., Y_n$ constitue a random sample from a normal population with mean $\mu$ and variance $\sigma^2$.
+Then,
+$$
+Z=\sqrt{n}(\overline{Y}-\mu)/\sigma
+$$
+has a standard normal distribution (Theorem \ref{thm_1}).
+
+$$
+W
+=
+(n-1)S^2/\sigma^2
+$$
+has a $\chi^2$ distribution with df $\nu=n-1$ (Theorem \ref{thm_3}).
+And $Z$ and $W$ are independent.
+Therefore,
+$$
+T
+=
+\frac{Z}{\sqrt{W/\nu}}
+=
+\frac{\sqrt{n}(\overline{Y}-\mu)/\sigma}{\sqrt{[(n-1)S^2/\sigma^2]/(n-1)}}
+=
+\sqrt{n}\left(\frac{\overline{Y}-\mu}{S}\right)
+$$
+has a $t$ distribution with $(n-1)$ df.
+
+\begin{defn}
+$F$ distriution...
+\end{defn}
+```
+
+```{=latex}
+Graph of Gaussian distribution
+```
+
+```{r}
+xval <- seq(-3, 3, length.out = 500)
+yval_1 <- dnorm(xval, mean=0, sd=1)
+yval_0_2 <- dnorm(xval, mean=0, sd=0.2)
+```
+
+```{r}
+plot(xval, yval_1, type='l', ylim = c(0,2), col="red")
+points(xval, yval_0_2, type='l', col="blue")
+legend("topright", legend = c("st=1", "st=0.2"), text.col=c("red", "blue"))
+?legend
+```
+```{=latex}
+\section{Hypothesis Testing}
+\subsection{Testing Proportions}
+\subsubsection{Single Proportion}
+Consider $n$ binary trials, 
+in which the results are success $(1)$ and failure $(0)$.
+Denote by $\pi$ the true proportion,
+$\hat{p}$ is the sample estimate of $\pi$.
+A rule of thumb: $n\hat{p}$ and $n(1-\hat{p})$ are both greater than $5$.
+
+\textbf{One-Sample Z-Test}
+
+\begin{align*}
+H_0 : \pi = \pi_0\\
+H_A: \pi \neq \pi_0
+\end{align*}
+
+Test statistic with the following
+$$
+Z
+=
+\frac{\hat{p}-\pi_0}{\sqrt{\frac{\pi_0(1-\pi_0)}{n}}}.
+$$
+We can assume $Z\sim N(0, 1)$.
+
+\textbf{Two Proportions}
+
+\begin{align*}
+H_0 : \pi_2 - \pi_1 = 0\\
+H_A: \pi_2 - \pi_1 > 0.
+\end{align*}
+Let $\hat{p}_1=x1/n1$, $\hat{p}_2=x2/n2$,
+the test statistic is given by
+$$
+Z
+=
+\frac{\hat{p}_2-\hat{p}_1-\pi_0}{\sqrt{p^*(1-p^*)(\frac{1}{n_1}+\frac{1}{n_2})}},
+$$
+where
+$$
+p^*
+=
+\frac{x_1+x_2}{n_1+n_2}.
+$$
+We can treat $Z\sim N(0, 1)$.
+
+\begin{example}
+Consider the case:
+\begin{align*}
+H_0 : \pi = 0.9\\
+H_A: \pi < 0.9
+\end{align*}
+$n=89$ and $x=71$.
+
+\begin{enumerate}
+\item Compute the test statistic and the $p-$value and state your conclusion for the test using a significance level of $\alpha=0.1$.
+\item Using your estimated sample proportion, 
+construct a two-sided $90$ percent confidence interval for the true proportion of women who would recommend the skin cream.
+\end{enumerate}
+\end{example}
+```
+
+```{r}
+# Q1
+prop.test(71, 89, p=0.9, alternative="less", conf.level = 0.9, correct=FALSE)
+```
+
+```{r}
+n <- 89
+p_hat <- 71/89
+pi_0 <- 0.9
+Z <- (p_hat - pi_0) / (sqrt(pi_0*(1-pi_0)/n))
+# The p-value = pnorm(Z)
+pnorm(Z)
+```
+
+```{=latex}
+$p-$value very small; less than $0.1$. 
+There is evidence to reject $H_0$ and conclude the true proportion of women who would recommend in samples of size $89$ is less than $0.9$.
+```
+
+```{r}
+# Q2
+qnorm(c(0.05, 0.95))  * sqrt(p_hat * (1-p_hat)/n) + p_hat
+```
+
+```{=latex}
+\begin{example}
+Consider the case:
+$$
+x_1=97,\quad n_1=445,
+$$
+$$
+x_2=90,\quad n_2=419,
+$$
+
+\begin{align*}
+H_0 : \pi_2 - \pi_1 = 0\\
+H_A: \pi_2 - \pi_1 \neq 0.
+\end{align*}
+\end{example}
+```
+
+```{r}
+prop.test(x=c(97, 90), n=c(445, 419), alternative = "two.sided", conf.level = 0.95, correct=FALSE)
+```
+
+```{r}
+x_1 <- 97
+x_2 <- 90
+n_1 <- 445
+n_2 <- 419
+
+p_hat_1 <- x_1 / n_1
+p_hat_2 <- x_2 / n_2
+p_star <- (x_1 + x_2) / (n_1 + n_2)
+```
+
+```{r}
+#The 95% confidence interval
+qnorm(c(0.025, 1-0.025)) * sqrt(p_star*(1-p_star)*(1/n_1+1/n_2)) + p_hat_2 - p_hat_1
+```
+
+
+```{r}
+# Write a function Z.test that can perform a one- or two-sample Z-test
+Z.test <- function (p1, n1, p2=NULL, n2=NULL, p0, alternative="two.sided", conf.level=0.95){
+  if (!is.null(p2) & !is.null(n2)) {
+    cat("Two-sample Z-test.\n")
+    p.star <- (p1 * n1 + p2 * n2) / (n1 +n2)
+    z <- (p1 - p2 - p0) / sqrt(p.star*(1-p.star)*(1/n1 + 1/n2))
+    ci <- qnorm(c( (1 - conf.level) / 2, 1 - (1-conf.level) / 2)) * sqrt(p.star*(1-p.star)*(1/n1 + 1/n2)) + p1 - p2
+     if (alternative == "two.sided") {
+       if (z<0) {
+         p <- 2 * pnorm(z)
+       } else if (z>=0) {
+           p = 2*(1-z)
+         }
+       } else if (alternative == "greater") {
+         p <- 1 - pnorm(z)
+         } else if (alternative == "less") {
+           p <- pnorm(z)
+         }
+  } else if (!is.null(p2) | !is.null(n2)) {
+     cat("One-sample Z-test.\n")
+    z <- (p1 - p0) / sqrt(p0*(1-p0) / n1)
+    if (alternative == "two.sided") {
+      if (z<0) {
+         p <- 2 * pnorm(z)
+       } else if (z>=0) {
+           p = 2*(1-z)
+         }
+       } else if (alternative == "greater") {
+         p <- 1 - pnorm(z)
+         } else if (alternative == "less") {
+           p <- pnorm(z)
+         }
+
+    ci <- qnorm(c( (1 - conf.level) / 2, 1 - (1-conf.level) / 2)) * sqrt(p0*(1-p0) / n1) + p1
+  }
+return(list(Z=z,P=p,CI=ci))
+}
+```
+
+```{r}
+x1 <- 180
+n1 <- 233
+p.hat1 <- x1/n1
+x2 <- 175
+n2 <- 197
+p.hat2 <- x2/n2
+```
+
+```{r}
+Z.test(p.hat2,n2,NULL,n1,p0=0.2,conf.level=0.95, alternative = "less") # ...or you could flip the order of differencing and use alternative="less"
+```
+
+```{=latex}
+\subsection{Testing Categorical Variables}
+\subsubsection{Single Categorical Variable}
+Consider the following example.
+Suppose a researcher in sociology is interested in the dispersion of rates of facial hair in men of his local city and whether they are uniformly represented in the male population. 
+He defines a categorical variable with three levels: 
+clean shaven (1), 
+beard only or moustache only (2), 
+and beard and moustache (3). 
+He collects data on 53 randomly selected men and finds the following outcomes:
+```
+
+```{r}
+hairy <- c(2,3,2,3,2,1,3,3,2,2,3,2,2,2,3,3,3,2,3,2,2,2,1,3,2,2,2,1,2,2,3,
+           2,2,2,2,1,2,1,1,1,2,2,2,3,1,2,1,2,1,2,1,3,3)
+```
+
+```{=latex}
+The research question asks whether the proportions in each category are equally represented. 
+Let $\pi_1$, $\pi_2$, and $\pi_3$ represent the true pro- portion of men in the city who fall into groups 
+$1$, $2$, and $3$, 
+respectively. 
+You therefore seek to test these hypotheses:
+\begin{align*}
+&H_0: \pi_1 = \pi_2 = \pi_3 = \frac{1}{3}\\
+&H_A: H_0 \textrm{ is incorrect}
+\end{align*}
+For this test,
+use a standard significance level of $0.05$.
+
+\textbf{Calculation: Chi-Squared Test of Distribution}
+
+The quantities of interest are the proportion of $n$ observations in each of $k$ categories,
+$\pi_1,...,\pi_k$,
+for a single mutually exclusive and exhaustive categorical variable. 
+The null hypothesis defines hypothesized null values for each proportion; 
+label these respectively as $\pi_{0(1)},...,\pi_{0(k)}$. 
+The test statistic $\chi^2$ is given as
+$$
+\chi^2
+=
+\sum_{i=1}^k\frac{(O_i-E_i)^2}{E_i},
+$$
+where $O_i$ is the observed count and $E_i$ is the expected count in the $i$th cateogry, $i=1,...,k.$
+\begin{enumerate}
+\item $O_i$ are obtained directly from the raw data.
+\item $E_i=n\pi_{0(i)}$ are merely the product of the overall samplesize $n$ with the respective null proportion for each category. 
+\end{enumerate}
+The result of $\chi^2$ follows a $\chi^2-$distribution with $\nu=k-1$ degree of freedom.
+```
+
+```{r}
+n <- length(hairy)
+hairy.tab <- table(hairy)
+hairy.tab / n
+```
+
+```{r}
+expected <- 1/3 * n
+hairy.matrix <- cbind(1:3,hairy.tab,expected,
+                      (hairy.tab-expected)^2/expected)
+dimnames(hairy.matrix) <- list(c("clean","beard OR mous.",
+                                  "beard AND mous."),
+                               c("i","Oi","Ei","(Oi-Ei)^2/Ei"))
+hairy.matrix
+                   
+```
+
+```{r}
+X2 <- sum(hairy.matrix[,4])
+X2
+```
+
+```{r}
+1-pchisq(X2, df=2)
+```
+
+```{r}
+chisq.test(x=hairy.tab)
+```
+
+```{=latex}
+This small $p-$value provides evidence to suggest that the true frequencies in the defined categories of male facial hair are not uniformly distributed in a $1/3, 1/3, 1/3$ fashion.
+```
+
+
+```{r}
+chisq.test(x=hairy.tab, p=c(0.25, 0.5, 0.25))
+```
+
+```{=latex}
+The high $p-$value suggests there is no evidence to reject $H_0$ in this scenario. 
+In other words, 
+there is no evidence to suggest that the proportions hypothesized in $H_0$ are incorrect.
+```
+
+
+
+```{=latex}
+\section{Simple Linear Regression}
+\subsection{An Example of Linear Relationship}
+Consider the example \texttt{survey} in \texttt{MASS}.
+```
+
+```{r}
+library("MASS")
+plot(survey$Height~survey$Wr.Hnd, xlab="Writing handspan (cm)", ylab="Height (cm)")
+```
+
+```{=latex}
+Consider the simple varible linear model 
+$$
+\hat{y}=\hat{\beta}_0 + \hat{\beta}_1x,
+$$
+where $x$ is the virable \texttt{survey\$Wr.Hnd},
+$\hat{y}$ is the virable \texttt{survey\$Height}.
+```
+
+```{r}
+survfit <- lm(Height~Wr.Hnd, data=survey)
+summary(survfit)
+```
+
+```{=latex}
+\subsection{The coefficients:}
+As is shown,
+$$\hat{\beta}_0=113.9536,$$
+$$\hat{\beta}_1=3.1166.$$
+The parameters follow $t-$distributions with degrees of freedom $(n-2)$.
+The standarized $t$ value and $p-$value are reported for each parameter:
+$$
+113.9536/5.4416=20.94,
+$$
+$$
+3.1166/0.2888=10.79.
+$$
+These represent the results of a two-tailed hypothesis test formally defined as 
+\begin{align*}
+&H_0: \beta_j=0\\
+&H_A: \beta_j \neq 0.
+\end{align*}
+```
+
+```{=latex}
+\subsection{Confidence Intervals}
+```
+
+```{r}
+confint(survfit, level=0.95)
+```
+
+```{=latex}
+\subsection{The Multiple $R^2$}
+The multiple $R^2$ tells that about $36.1\%$ of the variation in the student heights can be attributed to handspan.
+```
+
+```{r}
+rho_xy <- cor(survey$Height, survey$Wr.Hnd, use="complete.obs")
+rho_xy^2
+```
+
+```{=latex}
+\subsection{Prediction}
+\subsubsection{Confidence Intervals for Mean Heights}
+```
+
+```{r}
+xvals <- data.frame(Wr.Hnd=c(14.5, 24))
+mypred.ci <- predict(survfit,newdata = xvals, interval="confidence", level=0.95)
+mypred.ci
+```
+
+```{=latex}
+\subsubsection{Prediction Intervals for Individual Observations}
+```
+
+```{r}
+mypred.pi <- predict(survfit, newdata = xvals, interval="prediction",level=0.95)
+mypred.pi
+```
+
+
+
+
+
+
+
+
