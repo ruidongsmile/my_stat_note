@@ -25,6 +25,11 @@ output:
 
 \theoremstyle{definition}
 \newtheorem{example}{Example}[section]
+
+\newcommand{\se}{\textrm{SE}}
+\newcommand{\rse}{\textrm{RSE}}
+\newcommand{\tss}{\textrm{TSS}}
+\newcommand{\rss}{\textrm{RSS}}
 ```
 
 
@@ -415,35 +420,119 @@ Consider the example \texttt{survey} in \texttt{MASS}.
 
 ```{r}
 library("MASS")
-plot(survey$Height~survey$Wr.Hnd, xlab="Writing handspan (cm)", ylab="Height (cm)")
+library("ISLR2")
 ```
+
+```{r}
+data <- read.csv("dataset/Advertising.csv")
+head(data)
+```
+```{r}
+plot(data$TV, data$sales, xlab="TV", ylab="sales")
+```
+
 
 ```{=latex}
 Consider the simple varible linear model 
 $$
 \hat{y}=\hat{\beta}_0 + \hat{\beta}_1x,
 $$
-where $x$ is the virable \texttt{survey\$Wr.Hnd},
-$\hat{y}$ is the virable \texttt{survey\$Height}.
+where $x$ is the virable \texttt{data\$TV},
+$\hat{y}$ is the virable \texttt{data\$sales}.
+
+\begin{enumerate}
+\item The \emph{resudual sum of squares} (RSS) is
+$$
+\textrm{RSS}
+=
+\sum_{i=1}^n(y_i - \hat{\beta}_0-\hat{\beta}_1x_i)^2
+$$
+\end{enumerate}
+
+Using some calculus one can show that to minimize RSS we have
+\begin{align*}
+&\hat{\beta}_1
+=
+\frac{\sum_{i=1}^n(x_i-\bar{x})(y_i-\bar{y})}{\sum_{i=1}^n(x_i-\bar{x})^2},\\
+&\hat{\beta}_0
+=
+\bar{y}-\hat{\beta}_1\bar{x},
+\end{align*}
+where $\bar{y}=\frac{1}{n}\sum_{i=1}^ny_i$,
+and $\bar{x}=\frac{1}{n}\sum_{i=1}^nx_i$.
+
+The standard errors associated with $\hat{\beta}_0$ and $\hat{\beta}_1$ are given by
+\begin{align*}
+\se(\hat{\beta}_0)^2
+&=
+\sigma^2\left(\frac{1}{n}+\frac{\bar{x}^2}{\sum_{i=1}^n(x_i-\bar{x})^2}\right),\\
+\se(\hat{\beta}_1)^2
+&=
+\frac{\sigma^2}{\sum_{i=1}^n(x_i-\bar{x})^2},
+\end{align*}
+where $\sigma$ is known as the \emph{residual standard error} (RSE),
+can be estimated by
+$$
+\textrm{RSE}
+=
+\sqrt{\textrm{RSS}/(n-2)}.
+$$
 ```
 
+
 ```{r}
-survfit <- lm(Height~Wr.Hnd, data=survey)
-summary(survfit)
+lm.fit <- lm(sales ~ TV, data = data)
+summary(lm.fit)
 ```
+
 
 ```{=latex}
 \subsection{The coefficients:}
+```
+
+```{r}
+x <- data$TV
+y <- data$sales
+x.mean <- mean(x)
+y.mean <- mean(y)
+beta.1 <- sum((x-x.mean)*(y-y.mean))/sum((x-x.mean)^2)
+beta.0 <- mean(y) - beta.1*mean(x)
+sprintf("beta.1 = %f, beta.0 = %f", beta.1, beta.0)
+```
+
+```{=latex}
 As is shown,
-$$\hat{\beta}_0=113.9536,$$
-$$\hat{\beta}_1=3.1166.$$
+$$\hat{\beta}_0=7.032594,$$
+$$\hat{\beta}_1=0.047537.$$
+```
+
+
+```{=latex}
+\subsection{Estimating the Coefficients}
+```
+
+```{r}
+n <- length(x)
+rss <- sum((y - (beta.0 + beta.1 * x))^2)
+rse <- sqrt(rss/(n-2))
+se.beta.0 <- rse * sqrt(1/n + x.mean^2/sum((x-x.mean)^2))
+se.beta.1 <- rse / sqrt(sum((x-x.mean)^2))
+sprintf("The standard error of beta.0 is : %f.", se.beta.0)
+```
+```{r}
+sprintf("The standard error of beta.1 is : %f.", se.beta.1)
+```
+
+```{=latex}
 The parameters follow $t-$distributions with degrees of freedom $(n-2)$.
 The standarized $t$ value and $p-$value are reported for each parameter:
 $$
-113.9536/5.4416=20.94,
+7.032594 / 0.457843 = 15.36,
 $$
 $$
-3.1166/0.2888=10.79.
+30.047537
+/0.002691
+=17.67.
 $$
 These represent the results of a two-tailed hypothesis test formally defined as 
 \begin{align*}
@@ -454,19 +543,48 @@ These represent the results of a two-tailed hypothesis test formally defined as
 
 ```{=latex}
 \subsection{Confidence Intervals}
+In this case,
+the $95\%$ confidence interval for $\beta_0$ is $[6.130, 7.935]$,
+the $95\%$ confidence interval for $\beta_1$ is $[0.042, 0.053]$.
+
 ```
 
 ```{r}
-confint(survfit, level=0.95)
+confint(lm.fit, level=0.95)
 ```
 
 ```{=latex}
-\subsection{The Multiple $R^2$}
-The multiple $R^2$ tells that about $36.1\%$ of the variation in the student heights can be attributed to handspan.
+\subsection{Assessing the Accuracy of the Model}
+The RSE is considered a measure of the lack of fit of the model to the data. 
 ```
 
 ```{r}
-rho_xy <- cor(survey$Height, survey$Wr.Hnd, use="complete.obs")
+sprintf("The RSE is equal to %f.", rse)
+```
+
+
+```{=latex}
+\subsection{The Multiple $R^2$}
+By definition,
+$$
+R^2
+=
+\frac{\tss-\rss}{\tss}
+=
+1-\frac{\rss}{\tss},
+$$
+where $\tss=\sum(y_i-\bar{y})^2$ is the \emph{total sum of squares}.
+The multiple $R^2$ tells that about $61.2\%$ of the variation in the TV can be attributed to sales.
+```
+
+```{r}
+tss <- sum((y - y.mean)^2)
+1 - rss/tss
+```
+
+
+```{r}
+rho_xy <- cor(data$sales, data$TV, use="complete.obs")
 rho_xy^2
 ```
 
@@ -476,8 +594,8 @@ rho_xy^2
 ```
 
 ```{r}
-xvals <- data.frame(Wr.Hnd=c(14.5, 24))
-mypred.ci <- predict(survfit,newdata = xvals, interval="confidence", level=0.95)
+xvals <- data.frame(TV=c(14.5, 24))
+mypred.ci <- predict(lm.fit,newdata = xvals, interval="confidence", level=0.95)
 mypred.ci
 ```
 
@@ -486,7 +604,7 @@ mypred.ci
 ```
 
 ```{r}
-mypred.pi <- predict(survfit, newdata = xvals, interval="prediction",level=0.95)
+mypred.pi <- predict(lm.fit, newdata = xvals, interval="prediction",level=0.95)
 mypred.pi
 ```
 
